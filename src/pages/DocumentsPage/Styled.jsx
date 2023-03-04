@@ -31,6 +31,18 @@ export const Document = styled.div`
   cursor: pointer;
 `;
 
+export const Header = styled.div`
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+`;
+
+export const Logout = styled.div`
+  color: red;
+  font-size: 16px;
+  cursor: pointer;
+`
+
 export const DocumentImage = styled.div`
   background-color: #2fa0f2;
   width: 100%;

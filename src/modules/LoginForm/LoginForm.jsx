@@ -16,23 +16,24 @@ const LoginForm = (props) => {
       <Input
         margin="48px 0 0 0"
         placeholder="Логин"
-        value={login}
-        setValue={setLogin}
+        value={props?.login}
+        setValue={props?.setLogin}
       />
-      {props?.email && (
+      {props?.haveEmail && (
         <Input
           margin="21px 0 0 0"
           placeholder="Email"
-          value={email}
-          setValue={setEmail}
+          value={props?.email}
+          setValue={props?.setEmail}
         />
       )}
 
       <Input
         margin="21px 0 0 0"
         placeholder="Пароль"
-        value={password}
-        setValue={setPassword}
+        type="password"
+        value={props?.password}
+        setValue={props?.setPassword}
       />
 
       <div>
