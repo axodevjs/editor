@@ -14,10 +14,14 @@ import { useEffect } from "react";
 import { auth } from "./actions/user";
 import AppStore from "./store/AppStore";
 import { observer } from "mobx-react-lite";
+import InvitePage from "./pages/InvitePage/InvitePage";
 
 function App() {
   useEffect(() => {
-    auth().then((response) => AppStore.setUser(response));
+    auth().then((response) => {
+      AppStore.setUser(response);
+      console.log(response);
+    });
   }, []);
 
   return (
@@ -59,6 +63,7 @@ function App() {
           />
           <Route path="/editor/:id" element={<EditorPage />} />
           <Route path="/commit" element={<DiffPage />} />
+          <Route path="/invites/:id" element={<InvitePage />} />
         </Routes>
       </Router>
     </div>

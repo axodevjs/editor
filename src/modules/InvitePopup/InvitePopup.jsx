@@ -6,10 +6,22 @@ import Title from "../../UI/Title";
 import Input from "../../UI/Input";
 import Select from "../../UI/Select";
 import Button from "../../UI/Button";
+import { createInvite } from "../../actions/invite";
+import DocumentsStore from "../../store/DocumentsStore";
 
 const InvitePopup = () => {
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState("");
+  const [role, setRole] = useState("Редактор");
+
+  const onSubmit = () => {
+    let invite = createInvite(DocumentsStore.document?._id, email, role).then(
+      (response) => {
+        setEmail("");
+        setRole("Редактор");
+      }
+    );
+    AppStore.setShowInvitePopup(false);
+  };
 
   return (
     <>
@@ -39,11 +51,7 @@ const InvitePopup = () => {
         />
 
         <div>
-          <Button
-            margin="20px 0 0 0"
-            wauto
-            onClick={() => AppStore.setShowInvitePopup(false)}
-          >
+          <Button margin="20px 0 0 0" wauto onClick={onSubmit}>
             Отправить
           </Button>
         </div>

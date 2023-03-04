@@ -19,10 +19,9 @@ export const createDocument = async (user, title) => {
       `${API_URL}/api/document/`,
       {
         title: title,
-        users: [{ id: user?.id, name: user?.name }],
-        commits: [{}, {}],
+        users: [{ role: "Владелец", userId: user?.id }],
+        commits: [],
         content: "",
-        userId: user?.id,
       },
       {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
