@@ -60,7 +60,7 @@ const DocumentsPage = () => {
             DocumentsStore.documents.map((item, i) => (
               <Document
                 key={i}
-                onClick={() => navigate(`/editor/${item?._id}`)}
+                onClick={() => navigate(`/editor/${item?.documentId}`)}
               >
                 <DocumentImage></DocumentImage>
                 <DocumentTitle>{item.title}</DocumentTitle>

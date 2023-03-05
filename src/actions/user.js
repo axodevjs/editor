@@ -37,6 +37,25 @@ export const registrationAction = async (username, email, password) => {
   return response;
 };
 
+export const addUser = async (email, role, documentId) => {
+  const response = await axios
+    .post(
+      `${API_URL}/api/document/addUser/${documentId}`,
+      {
+        email,
+        role,
+      },
+      {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      }
+    )
+    .catch(function (error) {
+      console.log(error.response);
+    });
+
+  return response;
+};
+
 export const logout = () => {
   localStorage.removeItem("token");
 };

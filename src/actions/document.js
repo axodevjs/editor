@@ -19,8 +19,14 @@ export const createDocument = async (user, title) => {
       `${API_URL}/api/document/`,
       {
         title: title,
-        users: [{ role: "Владелец", userId: user?.id }],
-        commits: [],
+        users: [
+          {
+            role: "Создатель",
+            userId: user?.id,
+            username: user?.username,
+            email: user?.username,
+          },
+        ],
         content: "",
       },
       {
