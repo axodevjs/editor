@@ -59,4 +59,9 @@ export const ActionIcon = styled.svg`
   }
 `;
 
-export const StyledCommisdt = styled.div``;
+export const Votes = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 10px;
+  font-size: 14px;
+`;

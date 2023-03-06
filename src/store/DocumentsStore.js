@@ -3,6 +3,8 @@ import { makeAutoObservable } from "mobx";
 class DocumentsStore {
   documents = [];
 
+  commits = [];
+
   document = {};
 
   constructor() {
@@ -15,6 +17,10 @@ class DocumentsStore {
 
   setDocument(document) {
     this.document = document;
+  }
+
+  setCommits(commits) {
+    this.commits = commits;
   }
 }
 

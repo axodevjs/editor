@@ -3,6 +3,8 @@ import AppStore from "../../store/AppStore";
 import Button from "../../UI/Button";
 import User from "../../UI/User";
 import { Container, DocumentTitle, UsersBlock, UsersList } from "./Styled";
+import { observer } from "mobx-react-lite";
+import DocumentsStore from "../../store/DocumentsStore";
 
 const Header = () => {
   return (
@@ -10,8 +12,9 @@ const Header = () => {
       <UsersBlock>
         Users:
         <UsersList>
-          <User name="Алексей" />
-          <User name="John" margin="0 0 0 22px" />
+          {DocumentsStore.document?.users?.map((item, i) => (
+            <User key={i} name={item?.username} />
+          ))}
           <Button
             onClick={() => AppStore.setShowInvitePopup(true)}
             margin="0 0 0 22px"
@@ -26,4 +29,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default observer(Header);

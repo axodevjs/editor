@@ -5,6 +5,11 @@ const StyledUser = styled.div`
   cursor: pointer;
   align-items: center;
   margin: ${({ margin }) => margin || ""};
+  margin-left: 20px;
+
+  &:nth-child(1) {
+    margin-left: 0;
+  }
 `;
 
 const Avatar = styled.div`

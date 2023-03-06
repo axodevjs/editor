@@ -19,8 +19,14 @@ import DocumentsStore from "../../store/DocumentsStore";
 import io from "socket.io-client";
 import AppStore from "../../store/AppStore";
 import { toJS } from "mobx";
+import { getCommits } from "../../actions/commit";
+import { API_URL } from "../../config/consts";
+import { observer } from "mobx-react-lite";
 
-const socket = io("http://localhost:7000");
+const socket = io(API_URL);
+
+const enabledConfig = { readonly: false };
+const disabledConfig = { readonly: true };
 
 const EditorPage = () => {
   let { id } = useParams();
@@ -34,39 +40,81 @@ const EditorPage = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    // if (!AppStore.user) {
-    //   navigate("/login");
-    // }
+    // sockets
+    socket.on("updateChannel", (channel) => {
+      AppStore.setChannel(channel);
+      console.log("update channel");
+
+      if (
+        channel?.users?.find(
+          (x) => x?.editing === true && x?.userId !== AppStore.user.id
+        )
+      ) {
+        setShowOverlay(true);
+        setOverlayText("Кто то делает правки");
+      } else {
+        if (toJS(DocumentsStore.commits)?.find((x) => x.status === "waiting")) {
+          setShowOverlay(true);
+          console.log("accept pls");
+          setOverlayText("Кто то внес правки, не все приняли решение по ним");
+        } else {
+          setShowOverlay(false);
+          setOverlayText("");
+        }
+      }
+    });
+
+    socket.on("commitCreate", (commit) => {
+      let copyCommits = toJS(DocumentsStore.commits);
+
+      if (!DocumentsStore.commits?.find((x) => x._id === commit?._id)) {
+        copyCommits.push(commit);
+
+        console.log(copyCommits);
+        DocumentsStore.setCommits(copyCommits);
+      }
+    });
+
+    socket.on("commitUpdate", ({ commits, newDocument }) => {
+      DocumentsStore.setCommits(commits);
+
+      if (newDocument) {
+        DocumentsStore.setDocument(newDocument);
+        setContent(newDocument?.content);
+
+        setShowOverlay(false);
+        setOverlayText("");
+      }
+    });
 
     getOneDocument(id).then((response) => {
       if (response?.status === 200) {
         DocumentsStore.setDocument(response?.data);
         setContent(response?.data?.content || "");
 
+        // get commits
+        getCommits(DocumentsStore?.document?._id).then((response) =>
+          DocumentsStore.setCommits(response?.data)
+        );
+
         // socket
         socket.emit("joinChannel", {
           document: toJS(DocumentsStore.document),
           user: AppStore.user,
-        });
-
-        socket.on("updateChannel", (channel) => {
-          AppStore.setChannel(channel);
-          console.log("update channel");
-
-          if (
-            channel?.users?.find(
-              (x) => x?.editing === true && x?.userId !== AppStore.user.id
-            )
-          ) {
-            setShowOverlay(true);
-            setOverlayText("Кто то делает правки");
-          }
         });
       } else {
         setError("Document not found");
       }
     });
   }, []);
+
+  useEffect(() => {
+    if (toJS(DocumentsStore.commits)?.find((x) => x.status === "waiting")) {
+      setShowOverlay(true);
+      console.log("accept pls");
+      setOverlayText("Кто то внес правки, не все приняли решение по ним");
+    }
+  }, [DocumentsStore.commits]);
 
   const onChange = (newContent) => {
     setContent(newContent);
@@ -78,17 +126,28 @@ const EditorPage = () => {
       user: AppStore.user,
     });
     setIsEditing(true);
+    setDisabled(false);
   };
 
   const sendEdit = () => {
     socket.emit("sendEdit", {
       document: toJS(DocumentsStore.document),
       user: AppStore.user,
+      newContent: content,
     });
-    setIsEditing(true);
+    setIsEditing(false);
+    setDisabled(true);
   };
 
-  const cancelEdit = () => {};
+  const cancelEdit = () => {
+    setIsEditing(false);
+    setContent(DocumentsStore?.document?.content);
+    socket.emit("stopEdit", {
+      document: toJS(DocumentsStore.document),
+      user: AppStore.user,
+    });
+    setDisabled(true);
+  };
 
   return (
     <Container>
@@ -107,7 +166,7 @@ const EditorPage = () => {
                     <Button onClick={sendEdit} wauto margin="21px 0 0 0">
                       Отправить на проверку
                     </Button>
-                    <Button onClick={cancelEdit} wauto margin="21px 0 0 0">
+                    <Button onClick={cancelEdit} wauto margin="21px 0 0 21px">
                       Отменить редактирование
                     </Button>
                   </>
@@ -139,26 +198,37 @@ const EditorPage = () => {
                   </EditingOverlay>
                 )}
 
-                <JoditEditor
-                  styles={{ minHeight: "100vh" }}
-                  disabled={true}
-                  ref={editor}
-                  value={content}
-                  tabIndex={1} // tabIndex of textarea
-                  // onBlur={onBlur} preferred to use only this option to update the content for performance reasons
-                  onChange={onChange}
-                  config={{
-                    readonly: disabled,
-                  }}
-                />
+                {!disabled ? (
+                  <JoditEditor
+                    styles={{ minHeight: "100vh" }}
+                    disabled={true}
+                    ref={editor}
+                    value={content}
+                    tabIndex={1} // tabIndex of textarea
+                    // onBlur={onBlur} preferred to use only this option to update the content for performance reasons
+                    onChange={onChange}
+                    config={enabledConfig}
+                  />
+                ) : (
+                  <JoditEditor
+                    styles={{ minHeight: "100vh" }}
+                    disabled={true}
+                    ref={editor}
+                    value={content}
+                    tabIndex={1} // tabIndex of textarea
+                    // onBlur={onBlur} preferred to use only this option to update the content for performance reasons
+                    onChange={onChange}
+                    config={disabledConfig}
+                  />
+                )}
               </EditorContainer>
             </InnerContent>
           </Content>
-          <Sidebar />
+          <Sidebar socket={socket} />
         </>
       )}
     </Container>
   );
 };
 
-export default EditorPage;
+export default observer(EditorPage);

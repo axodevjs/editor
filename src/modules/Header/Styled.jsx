@@ -16,6 +16,7 @@ export const UsersBlock = styled.div`
 export const UsersList = styled.div`
   display: flex;
   margin-top: 11px;
+  max-width: 50%;
 `;
 
 export const DocumentTitle = styled.div`
