@@ -3,6 +3,7 @@ import { makeAutoObservable } from "mobx";
 class AppStore {
   showInvitePopup = false;
   token = null;
+  channel = null;
   user = null;
 
   constructor() {
@@ -14,11 +15,15 @@ class AppStore {
   }
 
   setToken(token) {
-    this.token = token
+    this.token = token;
   }
 
   setUser(user) {
-    this.user = user
+    this.user = user;
+  }
+
+  setChannel(channel) {
+    this.channel = channel;
   }
 }
 

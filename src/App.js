@@ -20,6 +20,9 @@ function App() {
     auth().then((response) => {
       AppStore.setUser(response);
       console.log(response);
+      if (!response) {
+        document.location = "/login";
+      }
     });
   }, []);
 
