@@ -61,7 +61,8 @@ export const ActionIcon = styled.svg`
 
 export const Votes = styled.div`
   display: flex;
-  justify-content: flex-start;
+  flex-direction: column;
+  align-items: center;
   margin-top: 10px;
   font-size: 14px;
 `;

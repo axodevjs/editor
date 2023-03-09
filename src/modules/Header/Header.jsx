@@ -13,18 +13,22 @@ const Header = () => {
         Users:
         <UsersList>
           {DocumentsStore.document?.users?.map((item, i) => (
-            <User key={i} name={item?.username} />
+            <User key={i} email={item?.email} />
           ))}
-          <Button
-            onClick={() => AppStore.setShowInvitePopup(true)}
-            margin="0 0 0 22px"
-            padding="8.5px 16px"
-          >
-            +
-          </Button>
+          {AppStore?.role === "Создатель" || AppStore?.role === "Редактор" ? (
+            <Button
+              onClick={() => AppStore.setShowInvitePopup(true)}
+              margin="0 0 0 22px"
+              padding="8.5px 16px"
+            >
+              +
+            </Button>
+          ) : (
+            ""
+          )}
         </UsersList>
       </UsersBlock>
-      <DocumentTitle>Document 1</DocumentTitle>
+      <DocumentTitle>{DocumentsStore.document?.title}</DocumentTitle>
     </Container>
   );
 };

@@ -46,3 +46,8 @@ export const OverlayText = styled.div`
 
   color: #ffffff;
 `;
+
+export const Back = styled.div`
+  cursor: pointer;
+  margin-bottom: 20px;
+`;

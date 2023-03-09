@@ -5,6 +5,7 @@ import Commit from "./components/Commit/Commit";
 import { StyledSidebar } from "./Styled";
 import { observer } from "mobx-react-lite";
 import DocumentsStore from "../../store/DocumentsStore";
+import CommentsStore from "../../store/CommentsStore";
 
 const Sidebar = ({ socket }) => {
   const navigate = useNavigate();
@@ -13,17 +14,23 @@ const Sidebar = ({ socket }) => {
     <StyledSidebar>
       <Title margin="40px 0 0 40px">Изменения</Title>
       {DocumentsStore?.commits?.length > 0 &&
-        DocumentsStore?.commits?.map((item, i) => (
-          <Commit
-            key={i}
-            commit={item}
-            status={item?.status}
-            onClick={() => navigate("/commit")}
-            socket={socket}
-            votesAccept={item?.votesAccept}
-            votesReject={item?.votesReject}
-          />
-        ))}
+        DocumentsStore?.commits
+          ?.slice()
+          ?.reverse()
+          ?.map((item, i) => (
+            <Commit
+              key={i}
+              commit={item}
+              status={item?.status}
+              onClick={() => {
+                CommentsStore.setCommit(item);
+                CommentsStore.setShowDiff(true);
+              }}
+              socket={socket}
+              votesAccept={item?.votesAccept}
+              votesReject={item?.votesReject}
+            />
+          ))}
     </StyledSidebar>
   );
 };

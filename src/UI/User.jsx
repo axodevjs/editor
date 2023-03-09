@@ -36,8 +36,10 @@ const Name = styled.div`
 const User = (props) => {
   return (
     <StyledUser {...props}>
-      <Avatar color={props?.color}>{props?.name[0].toUpperCase()}</Avatar>
-      <Name>{props?.name}</Name>
+      <Avatar color={props?.color}>
+        {props?.email?.length > 0 && props?.email[0]?.toUpperCase()}
+      </Avatar>
+      <Name>{props?.email}</Name>
     </StyledUser>
   );
 };

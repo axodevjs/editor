@@ -2,7 +2,7 @@ import styled, { css } from "styled-components";
 
 export const Background = styled.div`
   position: fixed;
-  z-index: 2;
+  z-index: 10;
   top: 0;
   left: 0;
   background: #000000;
@@ -28,7 +28,7 @@ export const Window = styled.div`
   background-color: #fff;
 
   position: fixed;
-  z-index: 3;
+  z-index: 11;
   left: 0;
   right: 0;
   top: 0;

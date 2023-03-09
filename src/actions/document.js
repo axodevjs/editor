@@ -23,8 +23,7 @@ export const createDocument = async (user, title) => {
           {
             role: "Создатель",
             userId: user?.id,
-            username: user?.username,
-            email: user?.username,
+            email: user?.email,
           },
         ],
         content: "",

@@ -6,6 +6,8 @@ class AppStore {
   channel = null;
   user = null;
 
+  role = null;
+
   constructor() {
     makeAutoObservable(this);
   }
@@ -24,6 +26,10 @@ class AppStore {
 
   setChannel(channel) {
     this.channel = channel;
+  }
+
+  setRole(role) {
+    this.role = role;
   }
 }
 

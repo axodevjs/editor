@@ -3,6 +3,7 @@ import Header from "../../modules/Header/Header";
 import Sidebar from "../../modules/Sidebar/Sidebar";
 import Button from "../../UI/Button";
 import {
+  Back,
   Container,
   Content,
   EditingOverlay,
@@ -22,6 +23,9 @@ import { toJS } from "mobx";
 import { getCommits } from "../../actions/commit";
 import { API_URL } from "../../config/consts";
 import { observer } from "mobx-react-lite";
+import ReactDiffViewer from "react-diff-viewer";
+import { DiffContainer } from "../DiffPage/Styled";
+import CommentsStore from "../../store/CommentsStore";
 
 const socket = io(API_URL);
 
@@ -43,7 +47,6 @@ const EditorPage = () => {
     // sockets
     socket.on("updateChannel", (channel) => {
       AppStore.setChannel(channel);
-      console.log("update channel");
 
       if (
         channel?.users?.find(
@@ -62,6 +65,12 @@ const EditorPage = () => {
           setOverlayText("");
         }
       }
+
+      let role = toJS(DocumentsStore?.document?.users)?.find(
+        (x) => x?.userId === AppStore.user.id
+      )?.role;
+      console.log(role);
+      AppStore.setRole(role);
     });
 
     socket.on("commitCreate", (commit) => {
@@ -75,15 +84,24 @@ const EditorPage = () => {
       }
     });
 
-    socket.on("commitUpdate", ({ commits, newDocument }) => {
+    socket.on("commitUpdate", ({ commits, newDocument, commit }) => {
       DocumentsStore.setCommits(commits);
 
       if (newDocument) {
-        DocumentsStore.setDocument(newDocument);
-        setContent(newDocument?.content);
+        if (newDocument === "end") {
+          setShowOverlay(false);
+          setOverlayText("");
+        } else {
+          DocumentsStore.setDocument(newDocument);
+          setContent(newDocument?.content);
 
-        setShowOverlay(false);
-        setOverlayText("");
+          setShowOverlay(false);
+          setOverlayText("");
+        }
+      }
+
+      if (commit?.status === "rejected") {
+        setContent(DocumentsStore?.document?.content);
       }
     });
 
@@ -155,27 +173,32 @@ const EditorPage = () => {
         error
       ) : (
         <>
-          <CommentsPopup />
+          <CommentsPopup socket={socket} />
           <InvitePopup />
           <Content>
             <InnerContent>
               <Header />
               <div>
-                {isEditing ? (
-                  <>
-                    <Button onClick={sendEdit} wauto margin="21px 0 0 0">
-                      Отправить на проверку
-                    </Button>
-                    <Button onClick={cancelEdit} wauto margin="21px 0 0 21px">
-                      Отменить редактирование
-                    </Button>
-                  </>
-                ) : (
-                  !showOverlay && (
-                    <Button onClick={startEdit} wauto margin="21px 0 0 0">
-                      Начать редактирование
-                    </Button>
+                {AppStore?.role === "Создатель" ||
+                AppStore?.role === "Редактор" ? (
+                  isEditing ? (
+                    <>
+                      <Button onClick={sendEdit} wauto margin="21px 0 0 0">
+                        Отправить на проверку
+                      </Button>
+                      <Button onClick={cancelEdit} wauto margin="21px 0 0 21px">
+                        Отменить редактирование
+                      </Button>
+                    </>
+                  ) : (
+                    !showOverlay && (
+                      <Button onClick={startEdit} wauto margin="21px 0 0 0">
+                        Начать редактирование
+                      </Button>
+                    )
                   )
+                ) : (
+                  ""
                 )}
               </div>
 
@@ -198,28 +221,41 @@ const EditorPage = () => {
                   </EditingOverlay>
                 )}
 
-                {!disabled ? (
-                  <JoditEditor
-                    styles={{ minHeight: "100vh" }}
-                    disabled={true}
-                    ref={editor}
-                    value={content}
-                    tabIndex={1} // tabIndex of textarea
-                    // onBlur={onBlur} preferred to use only this option to update the content for performance reasons
-                    onChange={onChange}
-                    config={enabledConfig}
-                  />
+                {!CommentsStore.showDiff ? (
+                  !disabled ? (
+                    <JoditEditor
+                      styles={{ minHeight: "100vh" }}
+                      disabled={true}
+                      ref={editor}
+                      value={content}
+                      tabIndex={1} // tabIndex of textarea
+                      // onBlur={onBlur} preferred to use only this option to update the content for performance reasons
+                      onChange={onChange}
+                      config={enabledConfig}
+                    />
+                  ) : (
+                    <JoditEditor
+                      styles={{ minHeight: "100vh" }}
+                      disabled={true}
+                      ref={editor}
+                      value={content}
+                      tabIndex={1} // tabIndex of textarea
+                      // onBlur={onBlur} preferred to use only this option to update the content for performance reasons
+                      onChange={onChange}
+                      config={disabledConfig}
+                    />
+                  )
                 ) : (
-                  <JoditEditor
-                    styles={{ minHeight: "100vh" }}
-                    disabled={true}
-                    ref={editor}
-                    value={content}
-                    tabIndex={1} // tabIndex of textarea
-                    // onBlur={onBlur} preferred to use only this option to update the content for performance reasons
-                    onChange={onChange}
-                    config={disabledConfig}
-                  />
+                  <DiffContainer>
+                    <Back onClick={() => CommentsStore?.setShowDiff(false)}>
+                      Назад
+                    </Back>
+                    <ReactDiffViewer
+                      oldValue={CommentsStore.commit?.before}
+                      newValue={CommentsStore.commit?.after}
+                      splitView={true}
+                    />
+                  </DiffContainer>
                 )}
               </EditorContainer>
             </InnerContent>

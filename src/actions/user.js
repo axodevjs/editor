@@ -13,10 +13,10 @@ export const auth = async () => {
   }
 };
 
-export const loginAction = async (username, password) => {
+export const loginAction = async (email, password) => {
   try {
     const response = await axios.post(`${API_URL}/api/auth/login`, {
-      username,
+      email,
       password,
     });
     localStorage.setItem("token", response.data.token);
@@ -27,9 +27,9 @@ export const loginAction = async (username, password) => {
   }
 };
 
-export const registrationAction = async (username, email, password) => {
+export const registrationAction = async (email, password) => {
   const response = await axios
-    .post(`${API_URL}/api/auth/registration`, { username, email, password })
+    .post(`${API_URL}/api/auth/registration`, { email, password })
     .catch(function (error) {
       alert(error.response.data.message);
     });
