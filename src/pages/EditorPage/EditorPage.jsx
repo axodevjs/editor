@@ -42,6 +42,8 @@ const EditorPage = () => {
   const [showOverlay, setShowOverlay] = useState(false);
   const [overlayText, setOverlayText] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [canAccept, setCanAccept] = useState(false);
+  const [accepted, setAccepted] = useState(false);
 
   useEffect(() => {
     // sockets
@@ -64,6 +66,18 @@ const EditorPage = () => {
           setShowOverlay(false);
           setOverlayText("");
         }
+      }
+
+      if (channel?.users?.find((x) => x?.accepted === true)) {
+        setCanAccept(false);
+        setShowOverlay(true);
+        setOverlayText("Кто то принял документ");
+        setAccepted(true);
+      } else {
+        setCanAccept(true);
+        setShowOverlay(false);
+        setOverlayText("");
+        setAccepted(false);
       }
 
       let role = toJS(DocumentsStore?.document?.users)?.find(
@@ -167,6 +181,14 @@ const EditorPage = () => {
     setDisabled(true);
   };
 
+  const acceptDoc = () => {
+    setCanAccept(false);
+    socket.emit("startAccept", {
+      document: toJS(DocumentsStore.document),
+      user: AppStore.user,
+    });
+  };
+
   return (
     <Container>
       {error ? (
@@ -192,9 +214,20 @@ const EditorPage = () => {
                     </>
                   ) : (
                     !showOverlay && (
-                      <Button onClick={startEdit} wauto margin="21px 0 0 0">
-                        Начать редактирование
-                      </Button>
+                      <>
+                        <Button onClick={startEdit} wauto margin="21px 0 0 0">
+                          Начать редактирование
+                        </Button>
+                        {canAccept && (
+                          <Button
+                            onClick={acceptDoc}
+                            wauto
+                            margin="21px 0 0 20px"
+                          >
+                            Принять весь документ
+                          </Button>
+                        )}
+                      </>
                     )
                   )
                 ) : (
@@ -203,6 +236,11 @@ const EditorPage = () => {
               </div>
 
               <EditorContainer>
+                {AppStore.role !== "Создатель" && accepted && (
+                  <Button wauto margin="21px 0 20px 0">
+                    Экспорт
+                  </Button>
+                )}
                 {showOverlay && (
                   <EditingOverlay>
                     <svg
