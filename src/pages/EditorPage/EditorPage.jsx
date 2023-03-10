@@ -47,45 +47,45 @@ const EditorPage = () => {
 
   useEffect(() => {
     // sockets
-    socket.on("updateChannel", (channel) => {
-      AppStore.setChannel(channel);
+    socket.on(
+      "updateChannel",
+      (channel) => {
+        AppStore.setChannel(channel);
 
-      if (
-        channel?.users?.find(
-          (x) => x?.editing === true && x?.userId !== AppStore.user.id
-        )
-      ) {
-        setShowOverlay(true);
-        setOverlayText("Кто то делает правки");
-      } else {
-        if (toJS(DocumentsStore.commits)?.find((x) => x.status === "waiting")) {
+        if (
+          channel?.users?.find(
+            (x) => x?.editing === true && x?.userId !== AppStore.user.id
+          )
+        ) {
           setShowOverlay(true);
-          console.log("accept pls");
-          setOverlayText("Кто то внес правки, не все приняли решение по ним");
+          setOverlayText("Кто то делает правки");
         } else {
+          if (
+            toJS(DocumentsStore.commits)?.find((x) => x.status === "waiting")
+          ) {
+            setShowOverlay(true);
+            console.log("accept pls");
+            setOverlayText("Кто то внес правки, не все приняли решение по ним");
+          } else {
+            setShowOverlay(false);
+            setOverlayText("");
+          }
+        }
+
+        if (channel?.users?.find((x) => x?.accepted === true)) {
+          setCanAccept(false);
+          setShowOverlay(true);
+          setOverlayText("Кто то принял документ");
+          setAccepted(true);
+        } else {
+          setCanAccept(true);
           setShowOverlay(false);
           setOverlayText("");
+          setAccepted(false);
         }
-      }
-
-      if (channel?.users?.find((x) => x?.accepted === true)) {
-        setCanAccept(false);
-        setShowOverlay(true);
-        setOverlayText("Кто то принял документ");
-        setAccepted(true);
-      } else {
-        setCanAccept(true);
-        setShowOverlay(false);
-        setOverlayText("");
-        setAccepted(false);
-      }
-
-      let role = toJS(DocumentsStore?.document?.users)?.find(
-        (x) => x?.userId === AppStore.user.id
-      )?.role;
-      console.log(role);
-      AppStore.setRole(role);
-    });
+      },
+      []
+    );
 
     socket.on("commitCreate", (commit) => {
       let copyCommits = toJS(DocumentsStore.commits);
@@ -139,6 +139,26 @@ const EditorPage = () => {
       }
     });
   }, []);
+
+  useEffect(() => {
+    if (AppStore?.user?.id && DocumentsStore?.document?._id) {
+      let role = toJS(DocumentsStore?.document?.users)?.find(
+        (x) => x?.userId === AppStore?.user?.id
+      )?.role;
+      console.log(role);
+      AppStore.setRole(role);
+    }
+  }, [DocumentsStore.document]);
+
+  useEffect(() => {
+    if (AppStore?.user?.id && DocumentsStore?.document?._id) {
+      let role = toJS(DocumentsStore?.document?.users)?.find(
+        (x) => x?.userId === AppStore?.user?.id
+      )?.role;
+      console.log(role);
+      AppStore.setRole(role);
+    }
+  }, [AppStore.user]);
 
   useEffect(() => {
     if (toJS(DocumentsStore.commits)?.find((x) => x.status === "waiting")) {
